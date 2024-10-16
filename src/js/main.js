@@ -10,10 +10,13 @@ const imageEl = document.querySelector("img");
 
 // === MARK: Fetch
 function getDogsList() {
-  return fetch(`${BASE_URL}breeds/list/all`)
-    .then((res) => res.json())
-    .then((data) => data.message)
-    .catch((err) => console.error("error aagyi", err));
+  try {
+    return fetch(`${BASE_URL}breeds/list/all`)
+      .then((res) => res.json())
+      .then((data) => data.message)
+  }catch(error){
+      return console.error(error);
+  }
 }
 
 // TODO: Implement this
@@ -34,4 +37,18 @@ function renderSelect() {
 
 renderSelect();
 
-function renderImage() {}
+async function renderSelect() {
+  const dogsList = await getDogsList();
+  Object.keys(dogsList).forEach((dogName)=>{
+  breedListEl.appendChild(Option(dogName));
+});
+}
+
+ async function renderImage(breed) {
+  getDogImage(breed).then((data) => {
+    imageEl.src = dogsImage;
+  });
+}
+
+renderImage("poodle");
+renderSelect;
