@@ -1,3 +1,4 @@
+// MARK: Imports
 import Option from "./components/Option";
 
 // https://dog.ceo/api/breed/affenpinscher/images/random
@@ -5,6 +6,7 @@ import Option from "./components/Option";
 
 const BASE_URL = `https://dog.ceo/api/`;
 
+// === MARK: DOM Selection
 const breedListEl = document.querySelector("#data-breed-list");
 const imageEl = document.querySelector("img");
 
@@ -26,39 +28,47 @@ async function getDogsList() {
   return breeds;
 }
 
-// TODO: Implement this
-function getDogImage(breed) {
-  fetch(`${BASE_URL}breed/${breed}/images/random`)
-    .then((res) => res.json())
-    .then((data) => data.message);
+// Fetch a single dog breed image
+async function getDogImage(breed) {
+  try {
+    const res = await fetch(`${BASE_URL}breed/${breed}/images/random`);
+    const data = await res.json();
+    return data.message;
+  } catch (error) {
+    return console.error(error);
+  }
 }
 
 // === MARK: Render
-function renderSelect() {
-  getDogsList().then((breedList) => {
-    const fragment = document.createDocumentFragment();
-    for (let breed in breedList) {
-      breedListEl.appendChild(Option(breed));
-    }
-  });
-}
-
-renderSelect();
-
 async function renderSelect() {
   const dogsList = await getDogsList();
-  Object.keys(dogsList).forEach((dogName)=>{
-  breedListEl.appendChild(Option(dogName));
-});
+
+  const fragment = document.createDocumentFragment();
+
+  console.log(dogsList);
+
+  Object.keys(dogsList).forEach((dogName) => {
+    fragment.appendChild(Option(dogName));
+  });
+
+  breedListEl.append(fragment);
 }
 
 async function renderImage(breed) {
-   imageEl.src= "giphy.webp"
-  getDogImage(breed).then((data) => {
-    imageEl.src = dogsImage;
-    imageEl.alt = breed;
-  });
+  imageEl.src = "loading.gif";
+
+  const dogImage = await getDogImage(breed);
+  imageEl.src = dogImage;
+  imageEl.alt = breed;
 }
 
-renderImage("poodle");
-renderSelect;
+// === MARK:  Events
+breedListEl.addEventListener("change", async (e) => {
+  const currentValue = e.target.value;
+  renderImage(currentValue);
+});
+
+// === Render on inital load
+document.addEventListener("DOMContentLoaded", () => {
+  renderSelect();
+});
