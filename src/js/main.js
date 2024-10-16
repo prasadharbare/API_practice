@@ -9,14 +9,21 @@ const breedListEl = document.querySelector("#data-breed-list");
 const imageEl = document.querySelector("img");
 
 // === MARK: Fetch
-function getDogsList() {
-  try {
-    return fetch(`${BASE_URL}breeds/list/all`)
-      .then((res) => res.json())
-      .then((data) => data.message)
-  }catch(error){
-      return console.error(error);
+async function getDogsList() {
+  let breeds = JSON.parse(localStorage.getItem("breeds"));
+
+  if (!breeds) {
+    try {
+      const res = await fetch(`${BASE_URL}breeds/list/all`);
+      const data = await res.json();
+      localStorage.setItem("breeds", JSON.stringify(data.message));
+      breeds = data.message;
+    } catch (err) {
+      console.error("Error occured", err);
+    }
   }
+
+  return breeds;
 }
 
 // TODO: Implement this
@@ -29,6 +36,7 @@ function getDogImage(breed) {
 // === MARK: Render
 function renderSelect() {
   getDogsList().then((breedList) => {
+    const fragment = document.createDocumentFragment();
     for (let breed in breedList) {
       breedListEl.appendChild(Option(breed));
     }
@@ -44,9 +52,11 @@ async function renderSelect() {
 });
 }
 
- async function renderImage(breed) {
+async function renderImage(breed) {
+   imageEl.src= "giphy.webp"
   getDogImage(breed).then((data) => {
     imageEl.src = dogsImage;
+    imageEl.alt = breed;
   });
 }
 
