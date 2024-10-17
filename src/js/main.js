@@ -1,6 +1,6 @@
 // MARK: Imports
 import Option from "./components/Option";
-import singleCarousel from "./components/SingleCarousel";
+import SingleCarousel from "./components/SingleCarousel";
 
 // https://dog.ceo/api/breed/affenpinscher/images/random
 // https://dog.ceo/api/breeds/list/all
@@ -12,6 +12,7 @@ const breedListEl = document.querySelector("#data-breed-list");
 const carouselContainerEl = document.querySelector(".carousel-inner");
 
 // === MARK: Fetch
+// Get dog breeds and set to local storage
 async function getDogsList() {
   let breeds = JSON.parse(localStorage.getItem("breeds"));
 
@@ -29,14 +30,12 @@ async function getDogsList() {
   return breeds;
 }
 
-// Fetch a single dog breed image
+// Fetch [images] for a given breed
 async function getDogImages(breed) {
   try {
-    const res = await fetch(`${BASE_URL}breed/${breed}/breed/images`);
-    console.log(data.message);
-    
+    const res = await fetch(`${BASE_URL}breed/${breed}/images`);
     const data = await res.json();
-    return data.message;
+    return data.message.slice(0, 10);
   } catch (error) {
     return console.error(error);
   }
@@ -56,25 +55,31 @@ async function renderSelect() {
 
   breedListEl.append(fragment);
 }
-  //fetch images for a given breed
+
 async function renderImageCarousel(breed) {
   carouselContainerEl.innerHTML = "";
+
+  // Step1: Get list of images based on breed
   const data = await getDogImages(breed);
+  console.log(data);
+
   const fragment = document.createDocumentFragment();
-  data.forEach(link => fragment.appendChild(singleCarousel(link)));
+
+  data.forEach((link, idx) => {
+    fragment.appendChild(SingleCarousel(link, idx === 0));
+  });
+
   carouselContainerEl.appendChild(fragment);
 }
-renderImageCarousel("poodle");
 
 // === MARK:  Events
-//render multiple breed options
 breedListEl.addEventListener("change", async (e) => {
-  const currentInput = e.target.value;
-  renderImageCarousel(currentValue);
+  const currInput = e.target.value;
+  renderImageCarousel(currInput);
 });
 
 // === Render on inital load
 document.addEventListener("DOMContentLoaded", () => {
   renderSelect();
+  renderImageCarousel("affenpinscher");
 });
-
