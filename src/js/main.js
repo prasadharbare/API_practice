@@ -1,5 +1,6 @@
 // MARK: Imports
 import Option from "./components/Option";
+import singleCarousel from "./components/SingleCarousel";
 
 // https://dog.ceo/api/breed/affenpinscher/images/random
 // https://dog.ceo/api/breeds/list/all
@@ -8,7 +9,7 @@ const BASE_URL = `https://dog.ceo/api/`;
 
 // === MARK: DOM Selection
 const breedListEl = document.querySelector("#data-breed-list");
-const imageEl = document.querySelector("img");
+const carouselContainerEl = document.querySelector(".carousel-inner");
 
 // === MARK: Fetch
 async function getDogsList() {
@@ -29,9 +30,11 @@ async function getDogsList() {
 }
 
 // Fetch a single dog breed image
-async function getDogImage(breed) {
+async function getDogImages(breed) {
   try {
-    const res = await fetch(`${BASE_URL}breed/${breed}/images/random`);
+    const res = await fetch(`${BASE_URL}breed/${breed}/breed/images`);
+    console.log(data.message);
+    
     const data = await res.json();
     return data.message;
   } catch (error) {
@@ -53,22 +56,25 @@ async function renderSelect() {
 
   breedListEl.append(fragment);
 }
-
-async function renderImage(breed) {
-  imageEl.src = "loading.gif";
-
-  const dogImage = await getDogImage(breed);
-  imageEl.src = dogImage;
-  imageEl.alt = breed;
+  //fetch images for a given breed
+async function renderImageCarousel(breed) {
+  carouselContainerEl.innerHTML = "";
+  const data = await getDogImages(breed);
+  const fragment = document.createDocumentFragment();
+  data.forEach(link => fragment.appendChild(singleCarousel(link)));
+  carouselContainerEl.appendChild(fragment);
 }
+renderImageCarousel("poodle");
 
 // === MARK:  Events
+//render multiple breed options
 breedListEl.addEventListener("change", async (e) => {
-  const currentValue = e.target.value;
-  renderImage(currentValue);
+  const currentInput = e.target.value;
+  renderImageCarousel(currentValue);
 });
 
 // === Render on inital load
 document.addEventListener("DOMContentLoaded", () => {
   renderSelect();
 });
+
